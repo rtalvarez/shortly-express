@@ -15,12 +15,17 @@ app.configure(function() {
   app.set('views', __dirname + '/views');
   app.set('view engine', 'ejs');
   app.use(partials());
-  app.use(express.bodyParser())
+  app.use(express.json());
+  app.use(express.bodyParser());
   app.use(express.static(__dirname + '/public'));
 });
 
-app.get('/', function(req, res) {
-  res.render('index');
+// app.get('/', function(req, res) {
+//   res.render('index');
+// });
+
+app.get('/', function(req, res){
+  res.render('login');
 });
 
 app.get('/create', function(req, res) {
@@ -30,7 +35,17 @@ app.get('/create', function(req, res) {
 app.get('/links', function(req, res) {
   Links.reset().fetch().then(function(links) {
     res.send(200, links.models);
-  })
+  });
+});
+
+app.post('/signup', function(req, res){
+  console.log(typeof(req.body));
+  var user = req.body.user;
+  var pass = req.body.password;
+});
+
+app.get('/signup', function(req, res) {
+  res.render('signup');
 });
 
 app.post('/links', function(req, res) {
