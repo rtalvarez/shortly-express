@@ -41,8 +41,18 @@ app.get('/links', function(req, res) {
 });
 
 app.post('/signup', function(req, res){
-  var user = req.body.user;
+  var user = req.body.username;
   var pass = req.body.password;
+  console.log('request', user + '|' + pass);
+  db.knex('users').where('username','=',user)
+  .then(function(resp){
+    console.log(resp, 'resp');
+    if (resp.length) { // length >0 implies user eixsts
+      console.log('user exists, throw err');
+    } else {
+      console.log('user does not exist');
+    }
+  });
 
 });
 
