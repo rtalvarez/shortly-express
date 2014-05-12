@@ -8,6 +8,8 @@ var User = require('./app/models/user');
 var Links = require('./app/collections/links');
 var Link = require('./app/models/link');
 var Click = require('./app/models/click');
+var sqlite3 = require('sqlite3');
+//var db = new sqlite3.Database('../db/shortly.sqlite')
 
 var app = express();
 
@@ -39,9 +41,9 @@ app.get('/links', function(req, res) {
 });
 
 app.post('/signup', function(req, res){
-  console.log(typeof(req.body));
   var user = req.body.user;
   var pass = req.body.password;
+
 });
 
 app.get('/signup', function(req, res) {
