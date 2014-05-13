@@ -12,8 +12,8 @@ var sqlite3 = require('sqlite3');
 var session = require('express-session');
 var cookieParser = require('cookie-parser');
 var SQLiteStore = require('connect-sqlite3')(express);
-var bcrypt = require('bcrypt');
 var Promise = require('bluebird');
+var bcrypt = Promise.promisifyAll(require('bcrypt-nodejs'));
 
 // var promisedInsert = function(user,pass){
 //   return new Promise(function(resolve))
@@ -72,19 +72,33 @@ app.post('/signup', function(req, res){
       res.render('userexists');
     } else {
       console.log('user does not exist');
+      // callback version of insert
+      // bcrypt.genSalt(10, function(err, salt){
+      //   bcrypt.hash(pass, salt, function(err, hash){
+      //     db.knex('users').insert({
+      //       username: user,
+      //       password: hash,
+      //       updated_at: new Date().getTime(),
+      //       created_at: new Date().getTime()
+      //     })
+      //     .then(function(){
+      //       res.render('login');
+      //       console.log('successful insert');
+      //     });
+      //   });
+      // });
+      // promise version of insert
 
-      bcrypt.genSalt(10, function(err, salt){
-        bcrypt.hash(pass, salt, function(err, hash){
-          db.knex('users').insert({
-            username: user,
-            password: hash,
-            updated_at: new Date().getTime(),
-            created_at: new Date().getTime()
-          })
-          .then(function(){
-            res.render('login');
-            console.log('successful insert');
-          });
+      bcrypt.hashAsync(pass, null, null)
+      .then(function(hash){
+        db.knex('users')
+        .insert({
+          username: user,
+          password: hash,
+        })
+      .then(function(){
+          res.render('login');
+          console.log('successful insert');
         });
       });
     }
