@@ -18,6 +18,9 @@
     "chai": "^1.9.0",
     "forever": "^0.10.11",
     "bcrypt-nodejs": "0.0.3",
-    "bluebird": "1.0.8"
+    "bluebird": "1.0.8",
+    "express-session": "~1.1.0",
+    "cookie-parser": "~1.1.0",
+    "connect-sqlite3": "~0.9.2"
   }
 }
