@@ -101,6 +101,18 @@ app.post('/login', function(req, res){
   });
 });
 
+/************************************************************/
+// INSERT LATE NOTES ON TESTING, COOKIES ARE A MAGICAL PLACE
+// 1. line 93-95 sets variables in the res.cookie
+// 2. res.cookie gets taken by the client and is used
+//  access the cookie from the request by req.cookies
+//  the s at the end is key!
+// 3. however, res.sessionID also returns a sessionID
+//  sessionID is not stored in the cookie, although...
+//    sessionID is the first part of cookies.sid
+//  the above overwrites sid, but does not overwrite sessionID
+// 4. req.cookies is viewable from chrome console
+/************************************************************/
 
 app.get('/signup', function(req, res) {
   res.render('signup');
