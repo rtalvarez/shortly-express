@@ -49,10 +49,18 @@ app.post('/signup', function(req, res){
     console.log(resp, 'resp');
     if (resp.length) { // length >0 implies user eixsts
       res.render('userexists');
-      // res.send('<script> alert("Username already exists");</script>');
     } else {
       console.log('user does not exist');
-
+      db.knex('users').insert({
+        username: user,
+        password: pass,
+        updated_at: new Date().getTime(),
+        created_at: new Date().getTime()
+      })
+      .then(function(){
+        res.render('login');
+        console.log('successful insert');
+      });
     }
   });
 
