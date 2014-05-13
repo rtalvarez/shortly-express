@@ -92,6 +92,7 @@ app.post('/login', function(req, res){
       res.render('loginfail');
     } else if (resp[0].password === pass) {
       res.cookie('sessionID', 'trolololololo');
+      res.cookie('sid', 'resetSIDviahack');
       // console.log(typeof res.cookie());
       // console.log('keys', Object.keys(res.cookie()));
       console.log('res cookie', res.cookie().req.sessionID);
@@ -151,9 +152,8 @@ app.post('/links', function(req, res) {
 /************************************************************/
 
 app.get('/*', function(req, res) {
-  console.log('req sid|', req.sid);
-  console.log('req id|', req.id);
-  console.log('req cookie()|', req.cookie().req.sessionID);
+  console.log(req.url);
+  console.log('req cookies|', req.cookies);
   console.log('req cookie|', req.sessionID);
   new Link({ code: req.params[0] }).fetch().then(function(link) {
     if (!link) {
