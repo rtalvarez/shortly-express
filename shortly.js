@@ -17,7 +17,7 @@ var app = express();
 app.use(cookieParser());
 
 
-
+var sessionStore = new SQLiteStore();
 
 app.configure(function() {
   app.set('views', __dirname + '/views');
@@ -30,7 +30,7 @@ app.configure(function() {
   app.use(session({
     secret: 'itsasecret',
     key: 'sid',
-    store: new SQLiteStore,
+    store: sessionStore,
     cookie: {
       maxAge: 60000
     }
@@ -164,7 +164,11 @@ app.post('/links', function(req, res) {
 /************************************************************/
 
 app.get('/*', function(req, res) {
-  console.log(req.url);
+
+  console.log('**************************************', req.url);
+  console.log('begin sessionStore info &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&');
+  console.log(sessionStore.db);
+  console.log('end sessionStore info &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&');
   console.log('req cookies|', req.cookies);
   console.log('req cookie|', req.sessionID);
   new Link({ code: req.params[0] }).fetch().then(function(link) {
