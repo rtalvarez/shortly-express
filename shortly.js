@@ -48,9 +48,11 @@ app.post('/signup', function(req, res){
   .then(function(resp){
     console.log(resp, 'resp');
     if (resp.length) { // length >0 implies user eixsts
-      console.log('user exists, throw err');
+      res.render('userexists');
+      // res.send('<script> alert("Username already exists");</script>');
     } else {
       console.log('user does not exist');
+
     }
   });
 
