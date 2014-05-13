@@ -12,6 +12,14 @@ var sqlite3 = require('sqlite3');
 var session = require('express-session');
 var cookieParser = require('cookie-parser');
 var SQLiteStore = require('connect-sqlite3')(express);
+var bcrypt = require('bcrypt');
+var Promise = require('bluebird');
+
+// var promisedInsert = function(user,pass){
+//   return new Promise(function(resolve))
+// }
+
+
 
 var app = express();
 app.use(cookieParser());
@@ -32,7 +40,7 @@ app.configure(function() {
     key: 'sid',
     store: sessionStore,
     cookie: {
-      maxAge: 60000
+      maxAge: 60000,
     }
   }));
 });
@@ -58,23 +66,26 @@ app.get('/links', function(req, res) {
 app.post('/signup', function(req, res){
   var user = req.body.username;
   var pass = req.body.password;
-  console.log('session loggin', req.session);
   db.knex('users').where('username','=',user)
   .then(function(resp){
-    console.log(resp, 'resp');
     if (resp.length) { // length >0 implies user eixsts
       res.render('userexists');
     } else {
       console.log('user does not exist');
-      db.knex('users').insert({
-        username: user,
-        password: pass,
-        updated_at: new Date().getTime(),
-        created_at: new Date().getTime()
-      })
-      .then(function(){
-        res.render('login');
-        console.log('successful insert');
+
+      bcrypt.genSalt(10, function(err, salt){
+        bcrypt.hash(pass, salt, function(err, hash){
+          db.knex('users').insert({
+            username: user,
+            password: hash,
+            updated_at: new Date().getTime(),
+            created_at: new Date().getTime()
+          })
+          .then(function(){
+            res.render('login');
+            console.log('successful insert');
+          });
+        });
       });
     }
   });
@@ -83,19 +94,12 @@ app.post('/signup', function(req, res){
 app.post('/login', function(req, res){
   var user = req.body.username;
   var pass = req.body.password;
-  // console.log('login post req', req.session);
-  // console.log('login cookie', req.cookie);
   db.knex('users').where('username', '=', user)
   .then(function(resp){
     if(!resp.length || resp[0].password !== pass){
     // if resp length = 0, username doesn't exist
       res.render('loginfail');
     } else if (resp[0].password === pass) {
-      res.cookie('sessionID', 'trolololololo');
-      res.cookie('sid', 'resetSIDviahack');
-      // console.log(typeof res.cookie());
-      // console.log('keys', Object.keys(res.cookie()));
-      console.log('res cookie', res.cookie().req.sessionID);
       res.render('index');
     }
   });
@@ -166,11 +170,8 @@ app.post('/links', function(req, res) {
 app.get('/*', function(req, res) {
 
   console.log('**************************************', req.url);
-  console.log('begin sessionStore info &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&');
-  console.log(sessionStore.db);
-  console.log('end sessionStore info &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&');
-  console.log('req cookies|', req.cookies);
-  console.log('req cookie|', req.sessionID);
+  console.log('req cookies|', req.cookies.sid);
+  console.log('sessionStore', sessionStore.db.filename);
   new Link({ code: req.params[0] }).fetch().then(function(link) {
     if (!link) {
       res.redirect('/');
