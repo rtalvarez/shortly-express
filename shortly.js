@@ -9,9 +9,15 @@ var Links = require('./app/collections/links');
 var Link = require('./app/models/link');
 var Click = require('./app/models/click');
 var sqlite3 = require('sqlite3');
-//var db = new sqlite3.Database('../db/shortly.sqlite')
+var session = require('express-session');
+var cookieParser = require('cookie-parser');
+var SQLiteStore = require('connect-sqlite3')(express);
 
 var app = express();
+app.use(cookieParser());
+
+
+
 
 app.configure(function() {
   app.set('views', __dirname + '/views');
@@ -20,6 +26,15 @@ app.configure(function() {
   app.use(express.json());
   app.use(express.bodyParser());
   app.use(express.static(__dirname + '/public'));
+  app.use(cookieParser());
+  app.use(session({
+    secret: 'itsasecret',
+    key: 'sid',
+    store: new SQLiteStore,
+    cookie: {
+      maxAge: 60000
+    }
+  }));
 });
 
 // app.get('/', function(req, res) {
@@ -43,7 +58,7 @@ app.get('/links', function(req, res) {
 app.post('/signup', function(req, res){
   var user = req.body.username;
   var pass = req.body.password;
-  console.log('request', user + '|' + pass);
+  console.log('session loggin', req.session);
   db.knex('users').where('username','=',user)
   .then(function(resp){
     console.log(resp, 'resp');
@@ -68,12 +83,18 @@ app.post('/signup', function(req, res){
 app.post('/login', function(req, res){
   var user = req.body.username;
   var pass = req.body.password;
+  // console.log('login post req', req.session);
+  // console.log('login cookie', req.cookie);
   db.knex('users').where('username', '=', user)
   .then(function(resp){
     if(!resp.length || resp[0].password !== pass){
     // if resp length = 0, username doesn't exist
       res.render('loginfail');
     } else if (resp[0].password === pass) {
+      res.cookie('sessionID', 'trolololololo');
+      // console.log(typeof res.cookie());
+      // console.log('keys', Object.keys(res.cookie()));
+      console.log('res cookie', res.cookie().req.sessionID);
       res.render('index');
     }
   });
@@ -130,6 +151,10 @@ app.post('/links', function(req, res) {
 /************************************************************/
 
 app.get('/*', function(req, res) {
+  console.log('req sid|', req.sid);
+  console.log('req id|', req.id);
+  console.log('req cookie()|', req.cookie().req.sessionID);
+  console.log('req cookie|', req.sessionID);
   new Link({ code: req.params[0] }).fetch().then(function(link) {
     if (!link) {
       res.redirect('/');
