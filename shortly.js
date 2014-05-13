@@ -15,12 +15,6 @@ var SQLiteStore = require('connect-sqlite3')(express);
 var Promise = require('bluebird');
 var bcrypt = Promise.promisifyAll(require('bcrypt-nodejs'));
 
-// var promisedInsert = function(user,pass){
-//   return new Promise(function(resolve))
-// }
-
-
-
 var app = express();
 app.use(cookieParser());
 
@@ -45,9 +39,11 @@ app.configure(function() {
   }));
 });
 
-// app.get('/', function(req, res) {
-//   res.render('index');
-// });
+// instead of rendering automatically, check first if user is authenticated
+app.get('/index', function(req,res){
+  console.log('request for index');
+  res.render('index');
+});
 
 app.get('/', function(req, res){
   res.render('login');
@@ -72,22 +68,6 @@ app.post('/signup', function(req, res){
       res.render('userexists');
     } else {
       console.log('user does not exist');
-      // callback version of insert
-      // bcrypt.genSalt(10, function(err, salt){
-      //   bcrypt.hash(pass, salt, function(err, hash){
-      //     db.knex('users').insert({
-      //       username: user,
-      //       password: hash,
-      //       updated_at: new Date().getTime(),
-      //       created_at: new Date().getTime()
-      //     })
-      //     .then(function(){
-      //       res.render('login');
-      //       console.log('successful insert');
-      //     });
-      //   });
-      // });
-      // promise version of insert
 
       bcrypt.hashAsync(pass, null, null)
       .then(function(hash){
@@ -111,11 +91,19 @@ app.post('/login', function(req, res){
   db.knex('users').where('username', '=', user)
   .then(function(resp){
     if(!resp.length || resp[0].password !== pass){
-    // if resp length = 0, username doesn't exist
+
       res.render('loginfail');
-    } else if (resp[0].password === pass) {
-      res.render('index');
     }
+
+    // this works now
+    bcrypt.compareAsync(pass, resp[0].password)
+    .then(function(response){
+      if (response) {
+        res.redirect('/index');
+      } else {
+        res.render('loginfail');
+      }
+    });
   });
 });
 
