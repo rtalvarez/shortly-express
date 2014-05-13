@@ -63,8 +63,22 @@ app.post('/signup', function(req, res){
       });
     }
   });
-
 });
+
+app.post('/login', function(req, res){
+  var user = req.body.username;
+  var pass = req.body.password;
+  db.knex('users').where('username', '=', user)
+  .then(function(resp){
+    if(!resp.length || resp[0].password !== pass){
+    // if resp length = 0, username doesn't exist
+      res.render('loginfail');
+    } else if (resp[0].password === pass) {
+      res.render('index');
+    }
+  });
+});
+
 
 app.get('/signup', function(req, res) {
   res.render('signup');
